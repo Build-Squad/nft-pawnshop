@@ -165,7 +165,7 @@ pub contract Domains: NonFungibleToken {
                         name: self.name,
                         description: self.bio,
                         thumbnail: MetadataViews.HTTPFile(
-                            url: "https://www.flow-domains.com/".concat(self.nameHash)
+                            url: "https://bafkreicaspuvj6os42mgbijtb66nplaq7kd3qnqfkhmjfngbngczipylkq.ipfs.nftstorage.link/"
                         )
                     )
                 case Type<MetadataViews.NFTCollectionData>():
