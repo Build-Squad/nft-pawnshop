@@ -5,10 +5,38 @@
     "sandboxnet": "access.sandboxnet.nodes.onflow.org:9000",
     "testnet": "access.devnet.nodes.onflow.org:9000"
   },
+  "contracts": {
+    "NonFungibleToken": {
+      "source": "./cadence/contracts/NonFungibleToken.cdc",
+      "aliases": {
+        "emulator": "0xf8d6e0586b0a20c7"
+      }
+    },
+    "MetadataViews": {
+      "source": "./cadence/contracts/MetadataViews.cdc",
+      "aliases": {
+        "emulator": "0xf8d6e0586b0a20c7"
+      }
+    },
+    "Domains": "./cadence/contracts/Domains.cdc",
+    "NFTPawnshop": "./cadence/contracts/NFTPawnshop.cdc"
+  },
   "accounts": {
     "emulator-account": {
       "address": "0xf8d6e0586b0a20c7",
       "key": "144768ecc6c31408e14d3f6446d936308d8c4505eac03deba002b8652cf5a313"
+    },
+    "peter": {
+      "address": "0x01cf0e2f2f715450",
+      "key": "2e951314f62f8e291b8de2847f082b60f3905fc4625c71e7bb44bfcd3b300bbd"
+    }
+  },
+  "deployments": {
+    "emulator": {
+      "emulator-account": [
+        "Domains",
+        "NFTPawnshop"
+      ]
     }
   }
 }

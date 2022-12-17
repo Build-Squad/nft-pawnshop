@@ -1,0 +1,19 @@
+flow transactions send ./cadence/transactions/transfer_flow_tokens.cdc 0x01cf0e2f2f715450 1500.0 --network=emulator --signer=emulator-account
+
+flow transactions send ./cadence/transactions/setDomainRentalPrices.cdc --network=emulator --signer=emulator-account
+
+flow transactions send ./cadence/transactions/createAccountCollection.cdc --network=emulator --signer=peter
+
+flow transactions send ./cadence/transactions/registerDomain.cdc build-squad 31536000.0 --network=emulator --signer=peter
+
+flow transactions send ./cadence/transactions/setDomainBioAndAddress.cdc 0x2114bfaee9ba56c8 'We are BuildSquad. #We aim to amaze!' 0 --network=emulator --signer=peter
+
+flow scripts execute ./cadence/scripts/getAccountCollection.cdc 0x01cf0e2f2f715450
+
+flow transactions send ./cadence/transactions/addTokenInfo.cdc --network=emulator --signer=emulator-account
+
+flow transactions send ./cadence/transactions/addPawn.cdc 0 --network=emulator --signer=peter
+
+flow scripts execute ./cadence/scripts/getPledgeInfo.cdc 0x01cf0e2f2f715450 --network=emulator
+
+flow transactions send ./cadence/transactions/redeemPledge.cdc --network=emulator --signer=peter
