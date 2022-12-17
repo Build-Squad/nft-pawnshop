@@ -20,7 +20,7 @@ transaction() {
         ) ?? panic("Could not borrow FungibleToken.Vault reference.")
 
         let feeTokens = self.admin.deposit(
-            salePrice: <- vault.withdraw(amount: 1500.0)
+            salePrice: <- vault.withdraw(amount: 500.0)
         )
 
         account.link<&NonFungibleToken.Collection>(
