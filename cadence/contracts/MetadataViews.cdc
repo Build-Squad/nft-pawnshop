@@ -1,4 +1,4 @@
-import FungibleToken from 0xee82856bf20e2aa6
+import FungibleToken from "FungibleToken.cdc"
 import NonFungibleToken from "NonFungibleToken.cdc"
 
 /// This contract implements the metadata standard proposed

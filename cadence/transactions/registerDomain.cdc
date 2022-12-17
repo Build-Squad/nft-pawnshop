@@ -1,4 +1,4 @@
-import FungibleToken from 0xee82856bf20e2aa6
+import FungibleToken from "../contracts/FungibleToken.cdc"
 import Domains from "../contracts/Domains.cdc"
 import NonFungibleToken from "../contracts/NonFungibleToken.cdc"
 

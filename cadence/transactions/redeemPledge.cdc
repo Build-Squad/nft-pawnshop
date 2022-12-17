@@ -1,5 +1,5 @@
-import FungibleToken from 0xee82856bf20e2aa6
-import FlowToken from 0x0ae53cb6e3f42a79
+import FungibleToken from "../contracts/FungibleToken.cdc"
+import FlowToken from "../contracts/FlowToken.cdc"
 import NFTPawnshop from "../contracts/NFTPawnshop.cdc"
 import NonFungibleToken from "../contracts/NonFungibleToken.cdc"
 import Domains from "../contracts/Domains.cdc"
@@ -10,7 +10,7 @@ transaction {
             Domains.DomainsPublicPath
         )
 
-        let identifier = "A.f8d6e0586b0a20c7.Domains"
+        let identifier = Domains.getType().identifier
 
         let vault = account.borrow<&FungibleToken.Vault>(
             from: /storage/flowTokenVault
