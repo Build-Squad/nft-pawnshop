@@ -12,7 +12,7 @@ flow scripts execute ./cadence/scripts/getAccountCollection.cdc 0x01cf0e2f2f7154
 
 flow transactions send ./cadence/transactions/addTokenInfo.cdc --network=emulator --signer=emulator-account
 
-flow transactions send ./cadence/transactions/addPawn.cdc 0 --network=emulator --signer=peter
+flow transactions send ./cadence/transactions/addPawn.cdc '[0]' --network=emulator --signer=peter
 
 flow scripts execute ./cadence/scripts/getPledgeInfo.cdc 0x01cf0e2f2f715450 --network=emulator
 

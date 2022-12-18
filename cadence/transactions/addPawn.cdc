@@ -4,7 +4,7 @@ import NFTPawnshop from "../contracts/NFTPawnshop.cdc"
 import NonFungibleToken from "../contracts/NonFungibleToken.cdc"
 import Domains from "../contracts/Domains.cdc"
 
-transaction(nftID: UInt64) {
+transaction(nftIDs: [UInt64]) {
     prepare(account: AuthAccount) {
         let tokenReceiver = account.getCapability<&FlowToken.Vault{FungibleToken.Receiver}>(
             /public/flowTokenReceiver
@@ -15,7 +15,7 @@ transaction(nftID: UInt64) {
         )
 
         let identifier = Domains.getType().identifier
-        let nftIDs = [nftID]
+        let nftIDs = nftIDs
 
         let pledge <- NFTPawnshop.pawnNFT(
             identifier: identifier,
