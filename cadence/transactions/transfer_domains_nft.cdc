@@ -1,5 +1,4 @@
 import NonFungibleToken from "../contracts/NonFungibleToken.cdc"
-import MetadataViews from "../contracts/MetadataViews.cdc"
 import Domains from "../contracts/Domains.cdc"
 
 transaction(recipient: Address, nftID: UInt64) {

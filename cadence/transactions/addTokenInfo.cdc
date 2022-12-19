@@ -1,5 +1,4 @@
 import FungibleToken from "../contracts/FungibleToken.cdc"
-import FlowToken from "../contracts/FlowToken.cdc"
 import NFTPawnshop from "../contracts/NFTPawnshop.cdc"
 import NonFungibleToken from "../contracts/NonFungibleToken.cdc"
 import MetadataViews from "../contracts/MetadataViews.cdc"
@@ -20,7 +19,7 @@ transaction() {
         ) ?? panic("Could not borrow FungibleToken.Vault reference.")
 
         let feeTokens = self.admin.deposit(
-            salePrice: <- vault.withdraw(amount: 500.0)
+            salePrice: <- vault.withdraw(amount: 5000.0)
         )
 
         account.link<&NonFungibleToken.Collection>(

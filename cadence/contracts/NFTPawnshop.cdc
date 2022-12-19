@@ -3,7 +3,7 @@ import FlowToken from "FlowToken.cdc"
 import NonFungibleToken from "NonFungibleToken.cdc"
 
 pub contract NFTPawnshop {
-    pub let collections: {String: Capability<&NonFungibleToken.Collection>}
+    access(contract) let collections: {String: Capability<&NonFungibleToken.Collection>}
     pub let AdminStoragePath: StoragePath
     pub let AdminPrivatePath: PrivatePath
 
@@ -99,9 +99,9 @@ pub contract NFTPawnshop {
     }
 
     pub resource Pledge: PledgePublic, PledgePrivate {
-        access(self) let debitor: Address
-        access(self) var expiry: UFix64
-        access(self) let nftPawns: {String: NFTPawn}
+        access(contract) let debitor: Address
+        access(contract) var expiry: UFix64
+        access(contract) let nftPawns: {String: NFTPawn}
 
         init(
             debitor: Address,
@@ -193,6 +193,10 @@ pub contract NFTPawnshop {
             self.salePrice = salePrice
         }
 
+        pub fun getBalance(): UFix64 {
+            return self.feesVault.balance
+        }
+
         pub fun deposit(salePrice: @FungibleToken.Vault) {
             self.feesVault.deposit(from: <- salePrice)
         }
@@ -217,6 +221,12 @@ pub contract NFTPawnshop {
         let admin = self.getAdmin()
 
         return admin.salePrice
+    }
+
+    pub fun getAdminBalance(): UFix64 {
+        let admin = self.getAdmin()
+
+        return admin.getBalance()
     }
 
     access(contract) fun getAdmin(): &Admin {

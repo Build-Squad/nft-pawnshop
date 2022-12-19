@@ -1,5 +1,4 @@
 import FungibleToken from "../contracts/FungibleToken.cdc"
-import FlowToken from "../contracts/FlowToken.cdc"
 import NFTPawnshop from "../contracts/NFTPawnshop.cdc"
 import NonFungibleToken from "../contracts/NonFungibleToken.cdc"
 import Domains from "../contracts/Domains.cdc"

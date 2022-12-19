@@ -48,7 +48,11 @@
     },
     "peter": {
       "address": "0x01cf0e2f2f715450",
-      "key": "bfe58b4cf5f0210bfa001b93a8987236f5cb13abfe66f4b427805edf5a6c541c"
+      "key": "2d0fb2c861ef535a3d0ead9c8ef2f870c1cfb34458a36e4d0e10bde5ed090dcc"
+    },
+    "admin-backup": {
+      "address": "0x179b6b1cb6755e31",
+      "key": "0ac371691df0d4e5f8d9224d6ffc36eb306a916e7ec8d0cc4b2fe046e9395be7"
     }
   },
   "deployments": {
