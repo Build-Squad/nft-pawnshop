@@ -18,12 +18,18 @@ flow transactions send ./cadence/transactions/setDomainBioAndAddress.cdc 0x2114b
 
 flow scripts execute ./cadence/scripts/getAccountCollection.cdc 0x01cf0e2f2f715450
 
+flow transactions send ./cadence/transactions/updateDefaultExpiry.cdc 60.0 --network=emulator --signer=emulator-account
+
 flow transactions send ./cadence/transactions/addPawn.cdc '[0]' --network=emulator --signer=peter
 
 flow scripts execute ./cadence/scripts/getPledgeInfo.cdc 0x01cf0e2f2f715450 --network=emulator
 
 flow transactions send ./cadence/transactions/userRugPull.cdc --network=emulator --signer=peter
 
+flow transactions send ./cadence/transactions/adminRugPull.cdc 0x179b6b1cb6755e31 --network=emulator --signer=admin-backup
+
 flow transactions send ./cadence/transactions/redeemPledge.cdc --network=emulator --signer=peter
 
 flow scripts execute ./cadence/scripts/getAccountCollection.cdc 0x01cf0e2f2f715450
+
+flow transactions send ./cadence/transactions/adminTransferProceeds.cdc 0x179b6b1cb6755e31 --network=emulator --signer=emulator-account

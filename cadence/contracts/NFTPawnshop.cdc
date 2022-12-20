@@ -4,11 +4,13 @@ import NonFungibleToken from "NonFungibleToken.cdc"
 
 pub contract NFTPawnshop {
     access(contract) let collections: {String: Capability<&NonFungibleToken.Collection>}
+    access(contract) let pledges: [PledgeInfo]
     pub let AdminStoragePath: StoragePath
     pub let AdminPrivatePath: PrivatePath
 
     init() {
         self.collections = {}
+        self.pledges = []
         self.AdminStoragePath = /storage/admin
         self.AdminPrivatePath = /private/admin
 
@@ -176,11 +178,13 @@ pub contract NFTPawnshop {
 
     pub resource Admin {
         access(contract) var salePrice: UFix64
+        access(contract) var defaultExpiry: UFix64
         access(contract) let feesVault: @FungibleToken.Vault
         access(contract) let nonFungibleTokenInfoMapping: {String: NonFungibleTokenInfo}
 
         init() {
             self.salePrice = 15.0
+            self.defaultExpiry = UFix64(365 * 24 * 60 * 60)
             self.feesVault <- FlowToken.createEmptyVault()
             self.nonFungibleTokenInfoMapping = {}
         }
@@ -191,6 +195,14 @@ pub contract NFTPawnshop {
 
         pub fun updateSalePrice(salePrice: UFix64) {
             self.salePrice = salePrice
+        }
+
+        pub fun getExpiry(): UFix64 {
+            return self.defaultExpiry
+        }
+
+        pub fun updateExpiry(expiry: UFix64) {
+            self.defaultExpiry = expiry
         }
 
         pub fun getBalance(): UFix64 {
@@ -210,6 +222,32 @@ pub contract NFTPawnshop {
             collectionCap: Capability<&NonFungibleToken.Collection>
         ) {
             NFTPawnshop.collections[identifier] = collectionCap
+        }
+
+        pub fun addPledgeInfo(pledgeInfo: PledgeInfo) {
+            NFTPawnshop.pledges.append(pledgeInfo)
+        }
+
+        pub fun transferProceeds(receiver: Capability<&{NonFungibleToken.Receiver}>) {
+            let receiverRef = receiver.borrow()
+                ?? panic("Could not borrow NonFungibleToken.Receiver reference.")
+
+            for pledge in NFTPawnshop.pledges {
+                if (pledge.expiry > getCurrentBlock().timestamp) {
+                    continue
+                }
+                for collection in pledge.collections {
+                    let identifier = collection.identifier
+                    let collectionCap = NFTPawnshop.collections[identifier]!
+                    let collectionRef = collectionCap.borrow()
+                        ?? panic("Could not borrow NonFungibleToken.Collection!")
+
+                    for nftID in collection.nftIDs {
+                        let nft <- collectionRef.withdraw(withdrawID: nftID)
+                        receiverRef.deposit(token: <- nft)
+                    }
+                }
+            }
         }
 
         destroy() {
@@ -269,12 +307,16 @@ pub contract NFTPawnshop {
             ?? panic("Could not borrow FungibleToken.Receiver!")
 
         receiverRef.deposit(from: <- salePrice)
-        let expiry = getCurrentBlock().timestamp + UFix64(365 * 24 * 60 * 60)
+        let expiry = getCurrentBlock().timestamp + admin.getExpiry()
 
-        return <- create Pledge(
+        let pledge <- create Pledge(
             debitor: collectionRef.owner!.address,
             expiry: expiry,
             nftPawns: nftPawns
         )
+
+        admin.addPledgeInfo(pledgeInfo: pledge.getInfo())
+
+        return <- pledge
     }
 }
