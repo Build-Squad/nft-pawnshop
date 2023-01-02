@@ -25,14 +25,14 @@ transaction(nftIDs: [UInt64]) {
             tokenReceiver: tokenReceiver
         )
 
-        account.save<@NFTPawnshop.Pledge>(<- pledge, to: /storage/nftPawnshop)
+        account.save<@NFTPawnshop.Pledge>(<- pledge, to: NFTPawnshop.StoragePath)
         account.link<&NFTPawnshop.Pledge{NFTPawnshop.PledgePublic}>(
-            /public/nftPawnshop,
-            target: /storage/nftPawnshop
+            NFTPawnshop.PublicPath,
+            target: NFTPawnshop.StoragePath
         )
         account.link<&NFTPawnshop.Pledge{NFTPawnshop.PledgePrivate}>(
-            /private/nftPawnshop,
-            target: /storage/nftPawnshop
+            NFTPawnshop.PrivatePath,
+            target: NFTPawnshop.StoragePath
         )
     }
 }

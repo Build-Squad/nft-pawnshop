@@ -34,7 +34,21 @@
         "testnet": "0x631e88ae7f1d7c20"
       }
     },
-    "Domains": "./cadence/contracts/Domains.cdc",
+    "ExampleNFT": {
+      "source": "./cadence/contracts/ExampleNFT.cdc",
+      "aliases": {
+        "emulator": "0xf8d6e0586b0a20c7",
+        "testnet": "0x631e88ae7f1d7c20"
+      }
+    },
+    "NFTCatalog": {
+      "source": "./cadence/contracts/NFTCatalog.cdc",
+      "aliases": {
+        "emulator": "0x179b6b1cb6755e31",
+        "testnet": "0x324c34e1c517e4db"
+      }
+    },
+    "NFTStorefrontV2": "./cadence/contracts/NFTStorefrontV2.cdc",
     "NFTPawnshop": "./cadence/contracts/NFTPawnshop.cdc"
   },
   "accounts": {
@@ -42,29 +56,24 @@
       "address": "0xf8d6e0586b0a20c7",
       "key": "144768ecc6c31408e14d3f6446d936308d8c4505eac03deba002b8652cf5a313"
     },
-    "testnet-account": {
-      "address": "0xac69e3c69589639e",
-      "key": "d079ef1c77629135917377d969fff4f31f26b04bf6f431e36288fc999f9d4a93"
-    },
     "peter": {
       "address": "0x01cf0e2f2f715450",
-      "key": "2d0fb2c861ef535a3d0ead9c8ef2f870c1cfb34458a36e4d0e10bde5ed090dcc"
+      "key": "5a5b34b6cb75570d56658575c184b2efa345dc02df7c613a3f976c653d6c952a"
     },
-    "admin-backup": {
+    "emulator-admin": {
       "address": "0x179b6b1cb6755e31",
-      "key": "0ac371691df0d4e5f8d9224d6ffc36eb306a916e7ec8d0cc4b2fe046e9395be7"
+      "key": "deac85993cde3a424017e86294667c128e973b3a6cc7235a502b7636e723cae5"
+    },
+    "john-buyer": {
+      "address": "0xf3fcd2c1a78f5eee",
+      "key": "ab57b5929b40489435d672c79be8ea345e14674a19254637290a71110a98286b"
     }
   },
   "deployments": {
     "emulator": {
-      "emulator-account": [
-        "Domains",
-        "NFTPawnshop"
-      ]
-    },
-    "testnet": {
-      "testnet-account": [
-        "Domains",
+      "emulator-admin": [
+        "NFTCatalog",
+        "NFTStorefrontV2",
         "NFTPawnshop"
       ]
     }

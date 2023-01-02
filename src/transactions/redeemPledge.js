@@ -22,7 +22,7 @@ transaction {
         )
 
         let pledge <- account.load<@NFTPawnshop.Pledge>(
-            from: /storage/nftPawnshop
+            from: NFTPawnshop.StoragePath
         ) ?? panic("Could not load NFTPawnshop.Pledge resource.")
 
         pledge.redeemNFT(
@@ -31,8 +31,8 @@ transaction {
             feeTokens: <- feeTokens
         )
 
-        account.unlink(/public/nftPawnshop)
-        account.unlink(/private/nftPawnshop)
+        account.unlink(NFTPawnshop.PublicPath)
+        account.unlink(NFTPawnshop.PrivatePath)
 
         destroy pledge
     }
