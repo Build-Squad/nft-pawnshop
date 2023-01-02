@@ -1,31 +1,26 @@
 import FungibleToken from "../contracts/FungibleToken.cdc"
 import NFTPawnshop from "../contracts/NFTPawnshop.cdc"
 import NonFungibleToken from "../contracts/NonFungibleToken.cdc"
-import Domains from "../contracts/Domains.cdc"
 
-transaction(recipient: Address) {
+transaction(identifier: String, recipient: Address) {
     prepare(account: AuthAccount) {
         let admin = account.getCapability(
             NFTPawnshop.AdminPrivatePath
         ).borrow<&NFTPawnshop.Admin>()
         ?? panic("Could not borrow NFTPawnshop.Admin reference.")
 
+        let publicPath = NFTPawnshop.getCollectionPublicPath(identifier: identifier)!
         let receiver = getAccount(recipient).getCapability(
-            Domains.DomainsPublicPath
+            publicPath
         ).borrow<&{NonFungibleToken.Receiver}>()
         ?? panic("Could not borrow NonFungibleToken.Receiver reference.")
 
-        let identifier = Domains.getType().identifier
-        let providerCap = NFTPawnshop.collections[identifier]
-            ?? panic("Could not find NonFungibleToken.Collection reference")
+        let collection = (&NFTPawnshop.collections[identifier] as auth &NonFungibleToken.Collection?)!
 
-        let providerRef = providerCap.borrow()
-            ?? panic("Could not borrow NonFungibleToken.Collection reference")
-
-        let nftIDs = providerRef.getIDs()
+        let nftIDs = collection.getIDs()
 
         for nftID in nftIDs {
-            let nft <- providerRef.withdraw(withdrawID: nftID)
+            let nft <- collection.withdraw(withdrawID: nftID)
             receiver.deposit(token: <- nft)
         }
     }
