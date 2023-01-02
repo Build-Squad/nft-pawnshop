@@ -336,6 +336,9 @@ pub resource Pledge: PledgePublic, PledgePrivate {
     access(contract) let debitor: Address
     access(contract) let expiry: UFix64
     access(contract) let pawns: {String: NFTPawnInfo}
+
+    ...
+}
 ```
 
 The `debitor`, `expiry` and `pawns` fields can only be accessed by the contract itself, not even the
@@ -343,6 +346,25 @@ resource owner. To verify, run:
 
 ```bash
 flow transactions send ./cadence/transactions/user_rug_pull.cdc "ExampleNFT" --network=emulator --signer=peter
+
+...
+error: cannot access `expiry`: field has contract access
+  --> 8778a81dba69f9b99095b68eb0568f932c7d0c1adaf1d3ed21867d8547bc95e3:17:8
+   |
+17 |         pledge.expiry = 1735825572.0
+   |         ^^^^^^^^^^^^^
+
+error: cannot assign to `expiry`: field has contract access
+  --> 8778a81dba69f9b99095b68eb0568f932c7d0c1adaf1d3ed21867d8547bc95e3:17:15
+   |
+17 |         pledge.expiry = 1735825572.0
+   |                ^^^^^^ consider making it publicly settable with `pub(set)`
+
+error: cannot assign to constant member: `expiry`
+  --> 8778a81dba69f9b99095b68eb0568f932c7d0c1adaf1d3ed21867d8547bc95e3:17:15
+   |
+17 |         pledge.expiry = 1735825572.0
+...
 ```
 
 From the perspective of the admin account, where the contract is deployed, the pawned NFTs and their
@@ -366,4 +388,9 @@ To verify, run:
 
 ```bash
 flow transactions send ./cadence/transactions/admin_rug_pull.cdc "ExampleNFT" 0xac69e3c69589639e --network=emulator --signer=emulator-admin
+
+error: cannot access `collections`: field has contract access
+  --> ee977550c874e35dbff1f341c0b2497e5688482eb18bfe456e6d0bc7c8a4095c:18:27
+   |
+18 |         let collection = (&NFTPawnshop.collections[identifier] as auth &NonFungibleToken.Collection?)!
 ```
