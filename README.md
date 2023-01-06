@@ -7,7 +7,7 @@ Pawn your illiquid or underperforming NFTs, save thousands in tax money or simpl
 ### 1. Install Dependencies
 
 _🛠 This project requires `NodeJS v16.x` or above._ See: [Node installation instructions](https://nodejs.org/en/) <br/>
-_🛠 This project requires `flow-cli v0.39.1` or above._ See: [Flow CLI installation instructions](https://developers.flow.com/tools/flow-cli/install) <br/>
+_🛠 This project requires `flow-cli v0.43.1` or above._ See: [Flow CLI installation instructions](https://developers.flow.com/tools/flow-cli/install) <br/>
 
 ### 2. Clone the project
 

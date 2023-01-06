@@ -48,7 +48,13 @@
         "testnet": "0x324c34e1c517e4db"
       }
     },
-    "NFTStorefrontV2": "./cadence/contracts/NFTStorefrontV2.cdc",
+    "NFTStorefrontV2": {
+      "source": "./cadence/contracts/NFTStorefrontV2.cdc",
+      "aliases": {
+        "emulator": "0xf8d6e0586b0a20c7",
+        "testnet": "0x2d55b98eb200daef"
+      }
+    },
     "NFTPawnshop": "./cadence/contracts/NFTPawnshop.cdc"
   },
   "accounts": {
@@ -73,7 +79,6 @@
     "emulator": {
       "emulator-admin": [
         "NFTCatalog",
-        "NFTStorefrontV2",
         "NFTPawnshop"
       ]
     }
