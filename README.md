@@ -60,7 +60,7 @@ flow transactions send ./cadence/transactions/transfer_flow_tokens.cdc 0x179b6b1
 
 flow transactions send ./cadence/transactions/fund_admin_vault.cdc 1000.0 --network=emulator --signer=emulator-admin
 
-node cadence/transactions/add_admin_collection.js
+node cadence/transactions/add_admin_collection.mjs
 ```
 
 With a proper setup, we should get:
@@ -80,7 +80,7 @@ Let's setup the account of `peter`, to hold some NFTs from the `ExampleNFT` coll
 ```bash
 flow transactions send ./cadence/transactions/transfer_flow_tokens.cdc 0x01cf0e2f2f715450 1500.0 --network=emulator --signer=emulator-account
 
-node cadence/transactions/setup_collection.js "ExampleNFT" peter
+node cadence/transactions/setup_collection.mjs "ExampleNFT" peter
 
 flow transactions send ./cadence/transactions/setup_account_to_receive_royalty.cdc '/storage/flowTokenVault' --network=emulator --signer=emulator-account
 
@@ -100,10 +100,17 @@ Result: [0, 1]
 To pawn NFTs for a specific collection, run:
 
 ```bash
-flow transactions send ./cadence/transactions/add_pawn.cdc "ExampleNFT" '[0, 1]' --network=emulator --signer=peter
+flow transactions send ./cadence/transactions/setup_pledge_collection.cdc --network=emulator --signer=peter
+
+flow transactions send ./cadence/transactions/pawn_nfts.cdc "ExampleNFT" '[1]' --network=emulator --signer=peter
+
+flow transactions send ./cadence/transactions/pawn_nfts.cdc "ExampleNFT" '[0]' --network=emulator --signer=peter
 ```
 
-Let's observe the side effects of this transaction:
+Note that multiple NFTs for a specific collection can be pawned with a single transaction also, by
+passing `'[0, 1]'`. For demo purposes, we made it in two transactions.
+
+Let's observe the side effects of these transactions:
 
 ```bash
 flow scripts execute ./cadence/scripts/get_admin_balance.cdc --network=emulator
@@ -139,46 +146,72 @@ the debitor to redeem the pawned NFTs, within the period of a year, by paying th
 price.
 
 ```bash
-flow scripts execute ./cadence/scripts/get_pledge_info.cdc 0x01cf0e2f2f715450 --network=emulator
-
-Result: A.179b6b1cb6755e31.NFTPawnshop.PledgeInfo(
-    debitor: 0x01cf0e2f2f715450,
-    expiry: 1704205431.00000000,
-    pawns: [
-        A.179b6b1cb6755e31.NFTPawnshop.NFTPawnInfo(
-            collectionIdentifier: "ExampleNFT",
-            nftIDs: [0, 1],
-            salePrice: 30.00000000
-        )
-    ]
-)
+flow scripts execute ./cadence/scripts/get_pledge_collection_info.cdc 0x01cf0e2f2f715450 --network=emulator
 ```
 
-The above exists as a resource in the account storage of `peter`.
-However, the same info exists in the contract:
+```cadence
+Result: [
+    A.179b6b1cb6755e31.NFTPawnshop.PledgeInfo(
+        id: 50,
+        debitor: 0x01cf0e2f2f715450,
+        expiry: 1704892702.00000000,
+        pawns: A.179b6b1cb6755e31.NFTPawnshop.NFTPawnInfo(
+            collectionIdentifier: "ExampleNFT",
+            nftIDs: [0],
+            salePrice: 15.00000000
+        )
+    ),
+    A.179b6b1cb6755e31.NFTPawnshop.PledgeInfo(
+        id: 48,
+        debitor: 0x01cf0e2f2f715450,
+        expiry: 1704892698.00000000,
+        pawns: A.179b6b1cb6755e31.NFTPawnshop.NFTPawnInfo(
+            collectionIdentifier: "ExampleNFT",
+            nftIDs: [1],
+            salePrice: 15.00000000
+        )
+    )
+]
+```
+
+The above exists as a resource (`NFTPawnshop.PledgeCollection`) in the account storage of `peter`.
+However, the same info can be found in the contract:
 
 ```bash
 flow scripts execute ./cadence/scripts/get_admin_pledges.cdc --network=emulator
+```
 
+```cadence
 Result: {
-    0x01cf0e2f2f715450: A.179b6b1cb6755e31.NFTPawnshop.PledgeInfo(
+    48: A.179b6b1cb6755e31.NFTPawnshop.PledgeInfo(
+        id: 48,
         debitor: 0x01cf0e2f2f715450,
-        expiry: 1704205431.00000000,
-        pawns: [
-            A.179b6b1cb6755e31.NFTPawnshop.NFTPawnInfo(
-                collectionIdentifier: "ExampleNFT",
-                nftIDs: [0, 1],
-                salePrice: 30.00000000
-            )
-        ]
+        expiry: 1704892698.00000000,
+        pawns: A.179b6b1cb6755e31.NFTPawnshop.NFTPawnInfo(
+            collectionIdentifier: "ExampleNFT",
+            nftIDs: [1],
+            salePrice: 15.00000000
+        )
+    ),
+    50: A.179b6b1cb6755e31.NFTPawnshop.PledgeInfo(
+        id: 50,
+        debitor: 0x01cf0e2f2f715450,
+        expiry: 1704892702.00000000,
+        pawns: A.179b6b1cb6755e31.NFTPawnshop.NFTPawnInfo(
+            collectionIdentifier: "ExampleNFT",
+            nftIDs: [0],
+            salePrice: 15.00000000
+        )
     )
 }
 ```
 
-Let's see how `peter` can redeem the 2 pawned NFTs:
+Let's see how `peter` can redeem each of the pawned NFTs:
 
 ```bash
-flow transactions send ./cadence/transactions/redeem_pledge.cdc "ExampleNFT" --network=emulator --signer=peter
+flow transactions send ./cadence/transactions/redeem_pledge.cdc "ExampleNFT" 48 --network=emulator --signer=peter
+
+flow transactions send ./cadence/transactions/redeem_pledge.cdc "ExampleNFT" 50 --network=emulator --signer=peter
 ```
 
 Let's observe the side effects of this transaction:
@@ -231,11 +264,13 @@ flow transactions send ./cadence/transactions/update_default_expiry.cdc 1.0 --ne
 This time, `peter` pawns just one NFT:
 
 ```bash
-flow transactions send ./cadence/transactions/add_pawn.cdc "ExampleNFT" '[1]' --network=emulator --signer=peter
+flow transactions send ./cadence/transactions/pawn_nfts.cdc "ExampleNFT" '[1]' --network=emulator --signer=peter
 ```
 
 ```bash
-flow transactions send ./cadence/transactions/redeem_pledge.cdc "ExampleNFT" --network=emulator --signer=peter
+flow scripts execute ./cadence/scripts/get_pledge_collection_info.cdc 0x01cf0e2f2f715450 --network=emulator
+
+flow transactions send ./cadence/transactions/redeem_pledge.cdc "ExampleNFT" 54 --network=emulator --signer=peter
 
 error: panic: The reedem period has expired!
    --> 179b6b1cb6755e31.NFTPawnshop:109:16
@@ -268,9 +303,9 @@ Let's view the created listing and its details:
 ```bash
 flow scripts execute ./cadence/scripts/get_storefront_ids.cdc 0x179b6b1cb6755e31 --network=emulator
 
-Result: [51]
+Result: [55]
 
-flow scripts execute ./cadence/scripts/get_listing_details.cdc 0x179b6b1cb6755e31 51 --network=emulator
+flow scripts execute ./cadence/scripts/get_listing_details.cdc 0x179b6b1cb6755e31 55 --network=emulator
 
 Result: A.179b6b1cb6755e31.NFTStorefrontV2.ListingDetails(
     storefrontID: 37,
@@ -300,11 +335,11 @@ We can buy this listing with the `john-buyer` account:
 
 ```bash
 # First we need to setup the account's collection.
-node cadence/transactions/setup_collection.js "ExampleNFT" john-buyer
+node cadence/transactions/setup_collection.mjs "ExampleNFT" john-buyer
 
 flow transactions send ./cadence/transactions/transfer_flow_tokens.cdc 0xf3fcd2c1a78f5eee 1500.0 --network=emulator --signer=emulator-account
 
-flow transactions send ./cadence/transactions/buy_item_via_catalog.cdc "ExampleNFT" 51 0x179b6b1cb6755e31 0x179b6b1cb6755e31 --network=emulator --signer=john-buyer
+flow transactions send ./cadence/transactions/buy_item_via_catalog.cdc "ExampleNFT" 55 0x179b6b1cb6755e31 0x179b6b1cb6755e31 --network=emulator --signer=john-buyer
 ```
 
 We can verify the purchase with:
@@ -318,7 +353,7 @@ Result: [1]
 While at it, let's cleanup the purchased listing from the Storefront:
 
 ```bash
-flow transactions send ./cadence/transactions/cleanup_purchased_listings.cdc 0x179b6b1cb6755e31 51 --network=emulator --signer=emulator-admin
+flow transactions send ./cadence/transactions/cleanup_purchased_listings.cdc 0x179b6b1cb6755e31 55 --network=emulator --signer=emulator-admin
 
 flow scripts execute ./cadence/scripts/get_storefront_ids.cdc 0x179b6b1cb6755e31 --network=emulator
 
@@ -335,7 +370,7 @@ From the perspective of the debitor (account holder with a `Pledge` resource), t
 pub resource Pledge: PledgePublic, PledgePrivate {
     access(contract) let debitor: Address
     access(contract) let expiry: UFix64
-    access(contract) let pawns: {String: NFTPawnInfo}
+    access(contract) let pawns: NFTPawnInfo
 
     ...
 }
@@ -345,7 +380,7 @@ The `debitor`, `expiry` and `pawns` fields can only be accessed by the contract 
 resource owner. To verify, run:
 
 ```bash
-flow transactions send ./cadence/transactions/user_rug_pull.cdc "ExampleNFT" --network=emulator --signer=peter
+flow transactions send ./cadence/transactions/user_rug_pull.cdc "ExampleNFT" 50 --network=emulator --signer=peter
 
 ...
 error: cannot access `expiry`: field has contract access
@@ -394,3 +429,7 @@ error: cannot access `collections`: field has contract access
    |
 18 |         let collection = (&NFTPawnshop.collections[identifier] as auth &NonFungibleToken.Collection?)!
 ```
+
+### Front-End
+
+This part is still a work-in-progress! More to come soon :pray:

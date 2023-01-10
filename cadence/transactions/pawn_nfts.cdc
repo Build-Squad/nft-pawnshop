@@ -5,14 +5,6 @@ import NonFungibleToken from "../contracts/NonFungibleToken.cdc"
 
 transaction(identifier: String, nftIDs: [UInt64]) {
     prepare(account: AuthAccount) {
-        if (account.borrow<&NFTPawnshop.Pledge>(from: NFTPawnshop.StoragePath) != nil) {
-            let pledge <- account.load<@NFTPawnshop.Pledge>(
-                from: NFTPawnshop.StoragePath
-            )
-
-            destroy pledge
-        }
-
         let tokenReceiver = account.getCapability<&FlowToken.Vault{FungibleToken.Receiver}>(
             /public/flowTokenReceiver
         )
@@ -36,14 +28,10 @@ transaction(identifier: String, nftIDs: [UInt64]) {
             tokenReceiver: tokenReceiver
         )
 
-        account.save<@NFTPawnshop.Pledge>(<- pledge, to: NFTPawnshop.StoragePath)
-        account.link<&NFTPawnshop.Pledge{NFTPawnshop.PledgePublic}>(
-            NFTPawnshop.PublicPath,
-            target: NFTPawnshop.StoragePath
-        )
-        account.link<&NFTPawnshop.Pledge{NFTPawnshop.PledgePrivate}>(
-            NFTPawnshop.PrivatePath,
-            target: NFTPawnshop.StoragePath
-        )
+        let pledgeCollection = account.getCapability(NFTPawnshop.PrivatePath)
+            .borrow<&NFTPawnshop.PledgeCollection{NFTPawnshop.PledgeCollectionPrivate}>()
+            ?? panic("Could not borrow NFTPawnshop.PledgeCollectionPrivate reference!")
+
+        pledgeCollection.deposit(pledge: <- pledge)
     }
 }

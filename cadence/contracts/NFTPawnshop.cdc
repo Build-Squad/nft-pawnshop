@@ -5,7 +5,7 @@ import NonFungibleToken from "NonFungibleToken.cdc"
 pub contract NFTPawnshop {
     access(contract) let collections: @{String: NonFungibleToken.Collection}
     pub let collectionsInfoMapping: {String: CollectionInfo}
-    pub let pledges: {Address: PledgeInfo}
+    pub let pledges: {UInt64: PledgeInfo}
 
     pub let StoragePath: StoragePath
     pub let PrivatePath: PrivatePath
@@ -30,6 +30,58 @@ pub contract NFTPawnshop {
         }
     }
 
+    pub resource interface PledgeCollectionPublic {
+        pub fun getIDs(): [UInt64]
+        pub fun borrowPledge(id: UInt64): &Pledge{PledgePublic}
+    }
+
+    pub resource interface PledgeCollectionPrivate {
+        pub fun deposit(pledge: @Pledge)
+        pub fun withdraw(id: UInt64): @Pledge
+        pub fun borrowPledgePrivate(id: UInt64): &Pledge
+    }
+
+    pub resource PledgeCollection: PledgeCollectionPublic, PledgeCollectionPrivate {
+        pub let ownedPledges: @{UInt64: Pledge}
+
+        init() {
+            self.ownedPledges <- {}
+        }
+
+        pub fun deposit(pledge: @Pledge) {
+            let uuid: UInt64 = pledge.uuid
+
+            self.ownedPledges[uuid] <-! pledge
+        }
+
+        pub fun withdraw(id: UInt64): @Pledge {
+            let pledge <- self.ownedPledges.remove(key: id)
+                ?? panic("Missing Pledge")
+
+            return <- pledge
+        }
+
+        pub fun getIDs(): [UInt64] {
+            return self.ownedPledges.keys
+        }
+
+        pub fun borrowPledge(id: UInt64): &Pledge{PledgePublic} {
+            let pledge = (&self.ownedPledges[id] as &Pledge{PledgePublic}?)!
+
+            return pledge
+        }
+
+        pub fun borrowPledgePrivate(id: UInt64): &Pledge {
+            let pledge = (&self.ownedPledges[id] as &Pledge?)!
+
+            return pledge
+        }
+
+        destroy() {
+            destroy self.ownedPledges
+        }
+    }
+
     pub struct NFTPawnInfo {
         pub let collectionIdentifier: String
         pub let nftIDs: [UInt64]
@@ -43,15 +95,18 @@ pub contract NFTPawnshop {
     }
 
     pub struct PledgeInfo {
+        pub let id: UInt64
         pub let debitor: Address
         pub let expiry: UFix64
-        pub let pawns: [NFTPawnInfo]
+        pub let pawns: NFTPawnInfo
 
         init(
+            id: UInt64,
             debitor: Address,
             expiry: UFix64,
-            pawns: [NFTPawnInfo]
+            pawns: NFTPawnInfo
         ) {
+            self.id = id
             self.debitor = debitor
             self.expiry = expiry
             self.pawns = pawns
@@ -63,7 +118,7 @@ pub contract NFTPawnshop {
     }
 
     pub resource interface PledgePrivate {
-        pub fun getSalePrice(identifier: String): UFix64
+        pub fun getSalePrice(): UFix64
 
         pub fun redeemNFT(
             identifier: String,
@@ -75,12 +130,12 @@ pub contract NFTPawnshop {
     pub resource Pledge: PledgePublic, PledgePrivate {
         access(contract) let debitor: Address
         access(contract) let expiry: UFix64
-        access(contract) let pawns: {String: NFTPawnInfo}
+        access(contract) let pawns: NFTPawnInfo
 
         init(
             debitor: Address,
             expiry: UFix64,
-            pawns: {String: NFTPawnInfo}
+            pawns: NFTPawnInfo
         ) {
             self.debitor = debitor
             self.expiry = expiry
@@ -89,14 +144,15 @@ pub contract NFTPawnshop {
 
         pub fun getInfo(): PledgeInfo {
             return PledgeInfo(
+                id: self.uuid,
                 debitor: self.debitor,
                 expiry: self.expiry,
-                pawns: self.pawns.values
+                pawns: self.pawns
             )
         }
 
-        pub fun getSalePrice(identifier: String): UFix64 {
-            return self.pawns[identifier]!.salePrice
+        pub fun getSalePrice(): UFix64 {
+            return self.pawns.salePrice
         }
 
         pub fun redeemNFT(
@@ -113,14 +169,11 @@ pub contract NFTPawnshop {
                 panic("Non authorized recipient!")
             }
 
-            let pawn = self.pawns[identifier]
-                ?? panic("Non-supported NonFungibleToken.")
-
             let feeSent = feeTokens.balance
-            if feeSent < pawn.salePrice {
+            if feeSent < self.getSalePrice() {
                 panic(
                     "You did not send enough FLOW tokens. Expected: "
-                    .concat(pawn.salePrice.toString())
+                    .concat(self.getSalePrice().toString())
                 )
             }
 
@@ -130,13 +183,13 @@ pub contract NFTPawnshop {
                 identifier: identifier
             )
 
-            let nftIDs: [UInt64] = pawn.nftIDs
+            let nftIDs: [UInt64] = self.pawns.nftIDs
             for id in nftIDs {
                 let nft <- collection.withdraw(withdrawID: id)
                 receiverRef.deposit(token: <- nft)
             }
 
-            NFTPawnshop.pledges.remove(key: self.debitor)
+            NFTPawnshop.pledges.remove(key: self.uuid)
 
             let admin = NFTPawnshop.getAdmin()
             admin.depositFees(salePrice: <- feeTokens)
@@ -199,27 +252,26 @@ pub contract NFTPawnshop {
             let receiverRef = receiver.borrow()
                 ?? panic("Could not borrow NonFungibleToken.Receiver reference.")
 
-            for address in NFTPawnshop.pledges.keys {
-                let pledgeInfo = NFTPawnshop.pledges[address]!
+            for pledgeID in NFTPawnshop.pledges.keys {
+                let pledgeInfo = NFTPawnshop.pledges[pledgeID]!
 
                 if (pledgeInfo.expiry > getCurrentBlock().timestamp) {
                     continue
                 }
 
-                for pawnInfo in pledgeInfo.pawns {
-                    let identifier = pawnInfo.collectionIdentifier
-                    let collection = NFTPawnshop.getAdminCollectionRef(
-                        identifier: identifier
-                    )
+                let pawnInfo = pledgeInfo.pawns
+                let identifier = pawnInfo.collectionIdentifier
+                let collection = NFTPawnshop.getAdminCollectionRef(
+                    identifier: identifier
+                )
 
-                    let nftIDs: [UInt64] = pawnInfo.nftIDs
-                    for id in nftIDs {
-                        let nft <- collection.withdraw(withdrawID: id)
-                        receiverRef.deposit(token: <- nft)
-                    }
+                let nftIDs: [UInt64] = pawnInfo.nftIDs
+                for id in nftIDs {
+                    let nft <- collection.withdraw(withdrawID: id)
+                    receiverRef.deposit(token: <- nft)
                 }
 
-                NFTPawnshop.pledges.remove(key: address)
+                NFTPawnshop.pledges.remove(key: pledgeID)
             }
         }
 
@@ -247,8 +299,7 @@ pub contract NFTPawnshop {
     ): @Pledge {
         let admin = NFTPawnshop.getAdmin()
         let salePrice <- admin.withdrawFees(itemCount: nfts.keys.length)
-        let pawns: {String: NFTPawnInfo} = {}
-        pawns[identifier] = NFTPawnInfo(
+        let pawns: NFTPawnInfo = NFTPawnInfo(
             collectionIdentifier: identifier,
             nftIDs: nfts.keys,
             salePrice: salePrice.balance
@@ -273,7 +324,7 @@ pub contract NFTPawnshop {
             pawns: pawns
         )
 
-        NFTPawnshop.pledges[tokenReceiver.address] = pledge.getInfo()
+        NFTPawnshop.pledges[pledge.uuid] = pledge.getInfo()
 
         destroy nfts
 
@@ -294,6 +345,10 @@ pub contract NFTPawnshop {
         )
 
         return collection.getIDs()
+    }
+
+    pub fun createEmptyPledgeCollection(): @NFTPawnshop.PledgeCollection {
+        return <- create NFTPawnshop.PledgeCollection()
     }
 
     access(contract) fun getAdminCollectionRef(identifier: String): &NonFungibleToken.Collection {
@@ -334,9 +389,9 @@ pub contract NFTPawnshop {
         self.collectionsInfoMapping = {}
         self.pledges = {}
 
-        self.StoragePath = /storage/nftPawnshop
-        self.PrivatePath = /private/nftPawnshop
-        self.PublicPath = /public/nftPawnshop
+        self.StoragePath = /storage/nftPawnshopPledgeCollection
+        self.PrivatePath = /private/nftPawnshopPledgeCollection
+        self.PublicPath = /public/nftPawnshopPledgeCollection
 
         self.AdminStoragePath = /storage/admin
         self.AdminPrivatePath = /private/admin

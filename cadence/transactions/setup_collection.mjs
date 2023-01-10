@@ -9,22 +9,34 @@ fcl.config()
   .put("0xMetadataViews", "0xf8d6e0586b0a20c7")
   .put("0xNFTCatalog", "0x179b6b1cb6755e31")
 
-const collection = 'ExampleNFT';
+const args = process.argv.slice(2);
 
-  try {
+const collectionIdentifier = args[0];
+if (collectionIdentifier === undefined) {
+  console.error('You need to pass the Collection identifier as an argument.');
+  process.exit(1);
+}
+
+const signer = args[1];
+if (signer === undefined) {
+  console.error('You need to pass the transaction signer as an argument.');
+  process.exit(1);
+}
+
+try {
   const scriptPath = new URL('../scripts/get_nft_catalog_collection_data.cdc', import.meta.url);
   const scriptCode = readFileSync(scriptPath, { encoding: 'utf8' });
 
   const nftCollection = await fcl.query({
     cadence: scriptCode,
     args: (arg, t) => [
-      arg(collection, t.String)
+      arg(collectionIdentifier, t.String)
     ]
   });
 
   console.log(nftCollection);
 
-  const filePath = new URL('./add_admin_collection_template.cdc', import.meta.url);
+  const filePath = new URL('./setup_collection_template.cdc', import.meta.url);
   const transactionTemplate = readFileSync(filePath, { encoding: 'utf8' });
 
   const transaction = transactionTemplate.replaceAll(
@@ -35,6 +47,15 @@ const collection = 'ExampleNFT';
     '{CONTRACT_ADDRESS}',
     nftCollection.contractAddress
   ).replaceAll(
+    '{STORAGE_PATH}',
+    `/${nftCollection.storagePath.domain}/${nftCollection.storagePath.identifier}`
+  ).replaceAll(
+    '{PRIVATE_PATH}',
+    `/${nftCollection.privatePath.domain}/${nftCollection.privatePath.identifier}`
+  ).replaceAll(
+    '{PUBLIC_PATH}',
+    `/${nftCollection.publicPath.domain}/${nftCollection.publicPath.identifier}`
+  ).replaceAll(
     '{PUBLIC_LINKED_TYPE}',
     nftCollection.publicLinkedType.type.typeID.replace(/A\.\w{16}\./g, '')
   ).replaceAll(
@@ -42,19 +63,14 @@ const collection = 'ExampleNFT';
     nftCollection.privateLinkedType.type.typeID.replace(/A\.\w{16}\./g, '')
   );
 
-
-  const transactionPath = './cadence/transactions/add_admin_collection.cdc';
+  const transactionPath = './cadence/transactions/setup_collection.cdc';
   writeFileSync(
     transactionPath,
     transaction
   );
 
-  const storagePath = `/${nftCollection.storagePath.domain}/${nftCollection.storagePath.identifier}`;
-  const privatePath = `/${nftCollection.privatePath.domain}/${nftCollection.privatePath.identifier}`;
-  const publicPath = `/${nftCollection.publicPath.domain}/${nftCollection.publicPath.identifier}`;
-
   const transactionCommand = `
-    flow transactions send ${transactionPath} ${collection} ${storagePath} ${privatePath} ${publicPath} --network=emulator --signer=emulator-admin
+    flow transactions send ${transactionPath} ${collectionIdentifier} --network=emulator --signer=${signer}
   `;
   console.log(transactionCommand);
 

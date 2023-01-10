@@ -2,24 +2,31 @@ import FungibleToken from "../contracts/FungibleToken.cdc"
 import NFTPawnshop from "../contracts/NFTPawnshop.cdc"
 import NonFungibleToken from "../contracts/NonFungibleToken.cdc"
 
-transaction(identifier: String) {
+transaction(identifier: String, pledgeID: UInt64) {
     prepare(account: AuthAccount) {
-        let publicPath = NFTPawnshop.getCollectionPublicPath(identifier: identifier)!
-        let receiver = account.getCapability<&{NonFungibleToken.Receiver}>(
-            publicPath
+        let tempPublicPath = PublicPath(identifier: "nftPawnshopRedeem")!
+        let storagePath = NFTPawnshop.getCollectionStoragePath(identifier: identifier)!
+
+        account.link<&{NonFungibleToken.Receiver}>(
+            tempPublicPath,
+            target: storagePath
         )
 
-        let pledge <- account.load<@NFTPawnshop.Pledge>(
-            from: NFTPawnshop.StoragePath
-        ) ?? panic("Could not load NFTPawnshop.Pledge resource.")
+        let receiver = account.getCapability<&{NonFungibleToken.Receiver}>(
+            tempPublicPath
+        )
+
+        let pledgeCollection = account.getCapability(NFTPawnshop.PrivatePath)
+            .borrow<&NFTPawnshop.PledgeCollection{NFTPawnshop.PledgeCollectionPrivate}>()
+            ?? panic("Could not borrow NFTPawnshop.PledgeCollectionPrivate reference!")
+        let pledge <- pledgeCollection.withdraw(id: pledgeID)
 
         let vault = account.borrow<&FungibleToken.Vault>(
             from: /storage/flowTokenVault
         ) ?? panic("Could not borrow FungibleToken.Vault reference.")
 
-        let salePrice = pledge.getSalePrice(identifier: identifier)
         let feeTokens <- vault.withdraw(
-            amount: salePrice
+            amount: pledge.getSalePrice()
         )
 
         pledge.redeemNFT(
@@ -28,8 +35,7 @@ transaction(identifier: String) {
             feeTokens: <- feeTokens
         )
 
-        account.unlink(NFTPawnshop.PublicPath)
-        account.unlink(NFTPawnshop.PrivatePath)
+        account.unlink(tempPublicPath)
 
         destroy pledge
     }
