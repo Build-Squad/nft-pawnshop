@@ -32,6 +32,7 @@ function App() {
   const [selectedCollection, setSelectedCollection] = useState("");
   const [selectedNFTs, setSelectedNFTs] = useState([]);
   const [pledges, setPledges] = useState([]);
+  const [accountSetup, setAccountSetup] = useState(false);
 
   const logIn = () => {
     fcl.authenticate();
@@ -51,6 +52,7 @@ function App() {
       fetchCollections();
       fetchPledges();
     }
+    isAccountSetup("0x231f3c0ba6e496a9");
   }, [user]);
 
   const handleCollectionClick = (_, key) => {
@@ -231,7 +233,9 @@ function App() {
     try {
       collections = await fcl.query({
         cadence: `${getCollectionsForAccount}`,
-        args: (arg, t) => [arg(user.addr, t.Address)],
+        args: (arg, t) => [
+          arg(user.addr, t.Address)
+        ],
       });
     } catch (err) {
       console.log('No Collections Found!');
@@ -348,6 +352,24 @@ function App() {
         'Error redeeming NFT, please check the console for error details!'
       );
     }
+  };
+
+  const isAccountSetup = async (address) => {
+    let setup = false;
+
+    try {
+      setup = await fcl.query({
+        cadence: `${checkAccountSetup}`,
+        args: (arg, t) => [
+          arg(address, t.Address)
+        ],
+      });
+    } catch (err) {
+      console.log('Unable to check account setup!');
+    }
+    console.log(`Account Setup: ${setup}`);
+
+    setAccountSetup(setup);
   };
 
   const RenderLogout = () => {
