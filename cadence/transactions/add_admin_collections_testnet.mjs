@@ -5,7 +5,7 @@ import * as fcl from "@onflow/fcl";
 fcl.config()
   .put("accessNode.api", "https://rest-testnet.onflow.org")
   .put("flow.network", "testnet")
-  .put("0xNFTPawnshop", "0x3874fd78d3c657bd")
+  .put("0xNFTPawnshop", "0x32f248a8b1603c92")
   .put("0xNonFungibleToken", "0x631e88ae7f1d7c20")
   .put("0xMetadataViews", "0x631e88ae7f1d7c20")
   .put("0xNFTCatalog", "0x324c34e1c517e4db")
@@ -56,7 +56,7 @@ try {
       collectionData.privateLinkedType.typeID.replace(/A\.\w{16}\./g, '')
     ).replaceAll(
       '"../contracts/NFTPawnshop.cdc"',
-      '0x3874fd78d3c657bd'
+      '0x32f248a8b1603c92'
     ).replaceAll(
       '"../contracts/NonFungibleToken.cdc"',
       '0x631e88ae7f1d7c20'

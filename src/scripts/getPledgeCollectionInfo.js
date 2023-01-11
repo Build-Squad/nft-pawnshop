@@ -1,4 +1,5 @@
-import NFTPawnshop from "../contracts/NFTPawnshop.cdc"
+export const getPledgeCollectionInfo = `
+import NFTPawnshop from 0xNFTPawnshop
 
 pub fun main(address: Address): [NFTPawnshop.PledgeInfo] {
     let account = getAccount(address)
@@ -20,3 +21,4 @@ pub fun main(address: Address): [NFTPawnshop.PledgeInfo] {
 
     return pledgeInfos
 }
+`;
