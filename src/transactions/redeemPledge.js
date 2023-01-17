@@ -1,29 +1,34 @@
 export const redeemPledge = `
 import FungibleToken from 0xFungibleToken
-import FlowToken from 0xFlowToken
 import NFTPawnshop from 0xNFTPawnshop
 import NonFungibleToken from 0xNonFungibleToken
-import Domains from 0xDomains
 
-transaction {
+transaction(identifier: String, pledgeID: UInt64) {
     prepare(account: AuthAccount) {
-        let receiver = account.getCapability<&{NonFungibleToken.Receiver}>(
-            Domains.DomainsPublicPath
+        let tempPublicPath = PublicPath(identifier: "nftPawnshopRedeem")!
+        let storagePath = NFTPawnshop.getCollectionStoragePath(identifier: identifier)!
+
+        account.link<&{NonFungibleToken.Receiver}>(
+            tempPublicPath,
+            target: storagePath
         )
 
-        let identifier = Domains.getType().identifier
+        let receiver = account.getCapability<&{NonFungibleToken.Receiver}>(
+            tempPublicPath
+        )
+
+        let pledgeCollection = account.getCapability(NFTPawnshop.PrivatePath)
+            .borrow<&NFTPawnshop.PledgeCollection{NFTPawnshop.PledgeCollectionPrivate}>()
+            ?? panic("Could not borrow NFTPawnshop.PledgeCollectionPrivate reference!")
+        let pledge <- pledgeCollection.withdraw(id: pledgeID)
 
         let vault = account.borrow<&FungibleToken.Vault>(
             from: /storage/flowTokenVault
         ) ?? panic("Could not borrow FungibleToken.Vault reference.")
 
         let feeTokens <- vault.withdraw(
-            amount: NFTPawnshop.getSalePrice()
+            amount: pledge.getSalePrice()
         )
-
-        let pledge <- account.load<@NFTPawnshop.Pledge>(
-            from: NFTPawnshop.StoragePath
-        ) ?? panic("Could not load NFTPawnshop.Pledge resource.")
 
         pledge.redeemNFT(
             identifier: identifier,
@@ -31,8 +36,7 @@ transaction {
             feeTokens: <- feeTokens
         )
 
-        account.unlink(NFTPawnshop.PublicPath)
-        account.unlink(NFTPawnshop.PrivatePath)
+        account.unlink(tempPublicPath)
 
         destroy pledge
     }
