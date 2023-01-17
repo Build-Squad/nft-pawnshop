@@ -33,7 +33,7 @@ const PledgesPage = ({ userDetails, fcl, confirm }) => {
         cadence: `${redeemPledge}`,
         args: (arg, t) => [
           arg(pledge.pawns.collectionIdentifier, t.String),
-          arg(pledge.id, t.Integer),
+          arg(pledge.id, t.UInt64),
         ],
         proposer: fcl.currentUser,
         payer: fcl.currentUser,
@@ -76,6 +76,7 @@ const PledgesPage = ({ userDetails, fcl, confirm }) => {
                   <th>Sale Price</th>
                   <th>Collection</th>
                   <th>NFT IDs</th>
+                  <th>Action</th>
                 </tr>
                 {pledges.map(pledge => (
                   <tr key={pledge.id}>
@@ -86,26 +87,27 @@ const PledgesPage = ({ userDetails, fcl, confirm }) => {
                     <td>{pledge.pawns.salePrice}</td>
                     <td>{pledge.pawns.collectionIdentifier}</td>
                     <td>{pledge.pawns.nftIDs.join(", ")}</td>
+                    <td>
+                      <button
+                        style={{ margin: "25px 0" }}
+                        className="cta-button button-glow"
+                        onClick={() => {
+                          if (
+                            confirm(
+                              "You are about to redeem your pawned NFTs by paying 15 Flow tokens for each. Are you sure?"
+                            )
+                          ) {
+                            redeem(pledge);
+                          }
+                        }}
+                      >
+                        Redeem
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </thead>
             </table>
-          </div>
-          <div style={{ marginTop: "50px" }} className="button-container">
-            <button
-              className="cta-button button-glow"
-              onClick={() => {
-                if (
-                  confirm(
-                    "You are about to redeem your pawned NFTs by paying 15 Flow tokens for each. Are you sure?"
-                  )
-                ) {
-                  redeem();
-                }
-              }}
-            >
-              Redeem
-            </button>
           </div>
         </div>
       ) : (
