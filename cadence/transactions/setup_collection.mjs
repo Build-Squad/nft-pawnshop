@@ -7,7 +7,7 @@ fcl.config()
   .put("flow.network", "emulator")
   .put("0xNonFungibleToken", "0xf8d6e0586b0a20c7")
   .put("0xMetadataViews", "0xf8d6e0586b0a20c7")
-  .put("0xNFTCatalog", "0x179b6b1cb6755e31")
+  .put("0xNFTCatalog", "0xf8d6e0586b0a20c7")
 
 const args = process.argv.slice(2);
 
