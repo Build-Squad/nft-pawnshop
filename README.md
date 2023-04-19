@@ -7,7 +7,7 @@ Pawn your illiquid or underperforming NFTs, save thousands in tax money or simpl
 ### 1. Install Dependencies
 
 _🛠 This project requires `NodeJS v16.x` or above._ See: [Node installation instructions](https://nodejs.org/en/) <br/>
-_🛠 This project requires `flow-cli v0.43.1` or above._ See: [Flow CLI installation instructions](https://developers.flow.com/tools/flow-cli/install) <br/>
+_🛠 This project requires `flow-cli v0.49.0` or above._ See: [Flow CLI installation instructions](https://developers.flow.com/tools/flow-cli/install) <br/>
 
 ### 2. Clone the project
 
@@ -27,7 +27,7 @@ npm install
 Run the emulator with:
 
 ```bash
-flow emulator --storage-limit=false --contracts -v
+flow emulator --storage-limit=false --contracts --coverage-reporting -v
 ```
 
 and create a few accounts that will be used for demonstrating the basic flows.
@@ -56,7 +56,7 @@ flow transactions send ./cadence/transactions/setup_storefront.cdc --network=emu
 
 flow transactions send ./cadence/transactions/setup_nft_catalog.cdc --network=emulator --signer=emulator-admin
 
-flow transactions send ./cadence/transactions/transfer_flow_tokens.cdc 0x179b6b1cb6755e31 1500.0 --network=emulator --signer=emulator-account
+flow transactions send ./cadence/transactions/transfer_flow_tokens.cdc 0x045a1763c93006ca 1500.0 --network=emulator --signer=emulator-account
 
 flow transactions send ./cadence/transactions/fund_admin_vault.cdc 1000.0 --network=emulator --signer=emulator-admin
 
@@ -73,26 +73,30 @@ Result: 1000.00000000
 flow scripts execute ./cadence/scripts/get_collection_names.cdc --network=emulator
 
 Result: ["ExampleNFT"]
+
+flow scripts execute ./cadence/scripts/get_sale_price.cdc --network=emulator
+
+Result: 15.00000000
 ```
 
 Let's setup the account of `peter`, to hold some NFTs from the `ExampleNFT` collection, which is included on the `NFTCatalog`.
 
 ```bash
-flow transactions send ./cadence/transactions/transfer_flow_tokens.cdc 0x01cf0e2f2f715450 1500.0 --network=emulator --signer=emulator-account
+flow transactions send ./cadence/transactions/transfer_flow_tokens.cdc 0xe03daebed8ca0615 1500.0 --network=emulator --signer=emulator-account
 
 node cadence/transactions/setup_collection.mjs "ExampleNFT" peter
 
 flow transactions send ./cadence/transactions/setup_account_to_receive_royalty.cdc '/storage/flowTokenVault' --network=emulator --signer=emulator-account
 
-flow transactions send ./cadence/transactions/mint_nft.cdc 0x01cf0e2f2f715450 'My Example NFT' 'My Example NFT Description' 'https://www.example-nft.com/thumbnails/0' '[0.05]' '["Tribute to Creator!"]' '[0xf8d6e0586b0a20c7]' --network=emulator --signer=emulator-account
+flow transactions send ./cadence/transactions/mint_nft.cdc 0xe03daebed8ca0615 'My Example NFT' 'My Example NFT Description' 'https://www.example-nft.com/thumbnails/0' '[0.05]' '["Tribute to Creator!"]' '[0xf8d6e0586b0a20c7]' --network=emulator --signer=emulator-account
 
-flow transactions send ./cadence/transactions/mint_nft.cdc 0x01cf0e2f2f715450 'My Example NFT #2' 'My Example NFT Description #2' 'https://www.example-nft.com/thumbnails/2' '[0.02]' '["Tribute to Creator!"]' '[0xf8d6e0586b0a20c7]' --network=emulator --signer=emulator-account
+flow transactions send ./cadence/transactions/mint_nft.cdc 0xe03daebed8ca0615 'My Example NFT #2' 'My Example NFT Description #2' 'https://www.example-nft.com/thumbnails/2' '[0.02]' '["Tribute to Creator!"]' '[0xf8d6e0586b0a20c7]' --network=emulator --signer=emulator-account
 ```
 
 The above account, should now contain 2 NFTs, which the holder can pawn to the contract:
 
 ```bash
-flow scripts execute ./cadence/scripts/get_collection_ids.cdc 0x01cf0e2f2f715450 --network=emulator
+flow scripts execute ./cadence/scripts/get_collection_ids.cdc 0xe03daebed8ca0615 --network=emulator
 
 Result: [0, 1]
 ```
@@ -120,15 +124,15 @@ flow scripts execute ./cadence/scripts/get_admin_balance.cdc --network=emulator
 # NFT should be properly valuated by the owner of the pawnshop.
 Result: 970.00000000
 
-flow accounts get 0x01cf0e2f2f715450
+flow accounts get 0xe03daebed8ca0615
 
 # The 30 FLOW tokens were deposited to the account of `peter`
-Address	 0x01cf0e2f2f715450
+Address	 0xe03daebed8ca0615
 Balance	 1530.00000000
 ```
 
 ```bash
-flow scripts execute ./cadence/scripts/get_collection_ids.cdc 0x01cf0e2f2f715450 --network=emulator
+flow scripts execute ./cadence/scripts/get_collection_ids.cdc 0xe03daebed8ca0615 --network=emulator
 
 # After pawning the 2 NFTs from the `ExampleNFT` collection, the account of `peter`
 # has no NFTs in its collection, which is expected.
@@ -146,26 +150,26 @@ the debitor to redeem the pawned NFTs, within the period of a year, by paying th
 price.
 
 ```bash
-flow scripts execute ./cadence/scripts/get_pledge_collection_info.cdc 0x01cf0e2f2f715450 --network=emulator
+flow scripts execute ./cadence/scripts/get_pledge_collection_info.cdc 0xe03daebed8ca0615 --network=emulator
 ```
 
 ```cadence
 Result: [
-    A.179b6b1cb6755e31.NFTPawnshop.PledgeInfo(
-        id: 50,
-        debitor: 0x01cf0e2f2f715450,
+    A.045a1763c93006ca.NFTPawnshop.PledgeInfo(
+        id: 56,
+        debitor: 0xe03daebed8ca0615,
         expiry: 1704892702.00000000,
-        pawns: A.179b6b1cb6755e31.NFTPawnshop.NFTPawnInfo(
+        pawns: A.045a1763c93006ca.NFTPawnshop.NFTPawnInfo(
             collectionIdentifier: "ExampleNFT",
             nftIDs: [0],
             salePrice: 15.00000000
         )
     ),
-    A.179b6b1cb6755e31.NFTPawnshop.PledgeInfo(
-        id: 48,
-        debitor: 0x01cf0e2f2f715450,
+    A.045a1763c93006ca.NFTPawnshop.PledgeInfo(
+        id: 58,
+        debitor: 0xe03daebed8ca0615,
         expiry: 1704892698.00000000,
-        pawns: A.179b6b1cb6755e31.NFTPawnshop.NFTPawnInfo(
+        pawns: A.045a1763c93006ca.NFTPawnshop.NFTPawnInfo(
             collectionIdentifier: "ExampleNFT",
             nftIDs: [1],
             salePrice: 15.00000000
@@ -183,21 +187,21 @@ flow scripts execute ./cadence/scripts/get_admin_pledges.cdc --network=emulator
 
 ```cadence
 Result: {
-    48: A.179b6b1cb6755e31.NFTPawnshop.PledgeInfo(
-        id: 48,
-        debitor: 0x01cf0e2f2f715450,
+    58: A.045a1763c93006ca.NFTPawnshop.PledgeInfo(
+        id: 58,
+        debitor: 0xe03daebed8ca0615,
         expiry: 1704892698.00000000,
-        pawns: A.179b6b1cb6755e31.NFTPawnshop.NFTPawnInfo(
+        pawns: A.045a1763c93006ca.NFTPawnshop.NFTPawnInfo(
             collectionIdentifier: "ExampleNFT",
             nftIDs: [1],
             salePrice: 15.00000000
         )
     ),
-    50: A.179b6b1cb6755e31.NFTPawnshop.PledgeInfo(
-        id: 50,
-        debitor: 0x01cf0e2f2f715450,
+    56: A.045a1763c93006ca.NFTPawnshop.PledgeInfo(
+        id: 56,
+        debitor: 0xe03daebed8ca0615,
         expiry: 1704892702.00000000,
-        pawns: A.179b6b1cb6755e31.NFTPawnshop.NFTPawnInfo(
+        pawns: A.045a1763c93006ca.NFTPawnshop.NFTPawnInfo(
             collectionIdentifier: "ExampleNFT",
             nftIDs: [0],
             salePrice: 15.00000000
@@ -209,9 +213,9 @@ Result: {
 Let's see how `peter` can redeem each of the pawned NFTs:
 
 ```bash
-flow transactions send ./cadence/transactions/redeem_pledge.cdc "ExampleNFT" 48 --network=emulator --signer=peter
+flow transactions send ./cadence/transactions/redeem_pledge.cdc "ExampleNFT" 56 --network=emulator --signer=peter
 
-flow transactions send ./cadence/transactions/redeem_pledge.cdc "ExampleNFT" 50 --network=emulator --signer=peter
+flow transactions send ./cadence/transactions/redeem_pledge.cdc "ExampleNFT" 58 --network=emulator --signer=peter
 ```
 
 Let's observe the side effects of this transaction:
@@ -222,13 +226,13 @@ flow scripts execute ./cadence/scripts/get_admin_balance.cdc --network=emulator
 # The admin account received 30 FLOW tokens
 Result: 1000.00000000
 
-flow accounts get 0x01cf0e2f2f715450
+flow accounts get 0xe03daebed8ca0615
 
 # The account of `peter` paid 30 FLOW tokens
-Address	 0x01cf0e2f2f715450
+Address	 0xe03daebed8ca0615
 Balance	 1500.00000000
 
-flow scripts execute ./cadence/scripts/get_collection_ids.cdc 0x01cf0e2f2f715450 --network=emulator
+flow scripts execute ./cadence/scripts/get_collection_ids.cdc 0xe03daebed8ca0615 --network=emulator
 
 # The `ExampleNFT` collection of `peter` regained possession of the 2 pawned NFTs
 Result: [0, 1]
@@ -255,10 +259,12 @@ Now let's see what would happen in the scenario where an account holder was not 
 redeem during the grace period.
 
 The default grace period is 1 year, so let's reduce it to just a second, for our demo. This
-doesn't affect already existing pledges.
+doesn't affect already existing pledges. We also changed the sale price to 10 FLOW tokens, this also doesn't affect already existing pledges.
 
 ```bash
 flow transactions send ./cadence/transactions/update_default_expiry.cdc 1.0 --network=emulator --signer=emulator-admin
+
+flow transactions send ./cadence/transactions/update_sale_price.cdc 10.0 --network=emulator --signer=emulator-admin
 ```
 
 This time, `peter` pawns just one NFT:
@@ -268,25 +274,25 @@ flow transactions send ./cadence/transactions/pawn_nfts.cdc "ExampleNFT" '[1]' -
 ```
 
 ```bash
-flow scripts execute ./cadence/scripts/get_pledge_collection_info.cdc 0x01cf0e2f2f715450 --network=emulator
+flow scripts execute ./cadence/scripts/get_pledge_collection_info.cdc 0xe03daebed8ca0615 --network=emulator
 
-flow transactions send ./cadence/transactions/redeem_pledge.cdc "ExampleNFT" 54 --network=emulator --signer=peter
+flow transactions send ./cadence/transactions/redeem_pledge.cdc "ExampleNFT" 62 --network=emulator --signer=peter
 
 error: panic: The reedem period has expired!
-   --> 179b6b1cb6755e31.NFTPawnshop:109:16
+   --> 045a1763c93006ca.NFTPawnshop:109:16
 ```
 
 The redeem was unsuccessful. This means that the admin account can only now transfer the proceeds,
 meaning the expired pledges.
 
 ```bash
-flow transactions send ./cadence/transactions/admin_transfer_proceeds.cdc "ExampleNFT" 0x179b6b1cb6755e31 --network=emulator --signer=emulator-admin
+flow transactions send ./cadence/transactions/admin_transfer_proceeds.cdc "ExampleNFT" 0x045a1763c93006ca --network=emulator --signer=emulator-admin
 ```
 
 To verify that it worked:
 
 ```bash
-flow scripts execute ./cadence/scripts/get_collection_ids.cdc 0x179b6b1cb6755e31 --network=emulator
+flow scripts execute ./cadence/scripts/get_collection_ids.cdc 0x045a1763c93006ca --network=emulator
 
 Result: [1]
 ```
@@ -301,13 +307,13 @@ flow transactions send ./cadence/transactions/sell_item_via_catalog.cdc "Example
 Let's view the created listing and its details:
 
 ```bash
-flow scripts execute ./cadence/scripts/get_storefront_ids.cdc 0x179b6b1cb6755e31 --network=emulator
+flow scripts execute ./cadence/scripts/get_storefront_ids.cdc 0x045a1763c93006ca --network=emulator
 
-Result: [55]
+Result: [63]
 
-flow scripts execute ./cadence/scripts/get_listing_details.cdc 0x179b6b1cb6755e31 55 --network=emulator
+flow scripts execute ./cadence/scripts/get_listing_details.cdc 0x045a1763c93006ca 63 --network=emulator
 
-Result: A.179b6b1cb6755e31.NFTStorefrontV2.ListingDetails(
+Result: A.045a1763c93006ca.NFTStorefrontV2.ListingDetails(
     storefrontID: 37,
     purchased: false,
     nftType: Type<A.f8d6e0586b0a20c7.ExampleNFT.NFT>(),
@@ -316,12 +322,12 @@ Result: A.179b6b1cb6755e31.NFTStorefrontV2.ListingDetails(
     salePaymentVaultType: Type<A.0ae53cb6e3f42a79.FlowToken.Vault>(),
     salePrice: 7.50000000,
     saleCuts: [
-        A.179b6b1cb6755e31.NFTStorefrontV2.SaleCut(
+        A.045a1763c93006ca.NFTStorefrontV2.SaleCut(
             receiver: Capability<&AnyResource{A.ee82856bf20e2aa6.FungibleToken.Receiver}>(address: 0xf8d6e0586b0a20c7, path: /public/GenericFTReceiver),
             amount: 0.15000000
         ),
-        A.179b6b1cb6755e31.NFTStorefrontV2.SaleCut(
-            receiver: Capability<&AnyResource{A.ee82856bf20e2aa6.FungibleToken.Receiver}>(address: 0x179b6b1cb6755e31, path: /public/flowTokenReceiver),
+        A.045a1763c93006ca.NFTStorefrontV2.SaleCut(
+            receiver: Capability<&AnyResource{A.ee82856bf20e2aa6.FungibleToken.Receiver}>(address: 0x045a1763c93006ca, path: /public/flowTokenReceiver),
             amount: 7.35000000
         )
     ],
@@ -337,15 +343,15 @@ We can buy this listing with the `john-buyer` account:
 # First we need to setup the account's collection.
 node cadence/transactions/setup_collection.mjs "ExampleNFT" john-buyer
 
-flow transactions send ./cadence/transactions/transfer_flow_tokens.cdc 0xf3fcd2c1a78f5eee 1500.0 --network=emulator --signer=emulator-account
+flow transactions send ./cadence/transactions/transfer_flow_tokens.cdc 0x120e725050340cab 1500.0 --network=emulator --signer=emulator-account
 
-flow transactions send ./cadence/transactions/buy_item_via_catalog.cdc "ExampleNFT" 55 0x179b6b1cb6755e31 0x179b6b1cb6755e31 --network=emulator --signer=john-buyer
+flow transactions send ./cadence/transactions/buy_item_via_catalog.cdc "ExampleNFT" 63 0x045a1763c93006ca 0x045a1763c93006ca --network=emulator --signer=john-buyer
 ```
 
 We can verify the purchase with:
 
 ```bash
-flow scripts execute ./cadence/scripts/get_collection_ids.cdc 0xf3fcd2c1a78f5eee --network=emulator
+flow scripts execute ./cadence/scripts/get_collection_ids.cdc 0x120e725050340cab --network=emulator
 
 Result: [1]
 ```
@@ -353,9 +359,9 @@ Result: [1]
 While at it, let's cleanup the purchased listing from the Storefront:
 
 ```bash
-flow transactions send ./cadence/transactions/cleanup_purchased_listings.cdc 0x179b6b1cb6755e31 55 --network=emulator --signer=emulator-admin
+flow transactions send ./cadence/transactions/cleanup_purchased_listings.cdc 0x045a1763c93006ca 63 --network=emulator --signer=emulator-admin
 
-flow scripts execute ./cadence/scripts/get_storefront_ids.cdc 0x179b6b1cb6755e31 --network=emulator
+flow scripts execute ./cadence/scripts/get_storefront_ids.cdc 0x045a1763c93006ca --network=emulator
 
 Result: []
 ```
@@ -429,6 +435,19 @@ error: cannot access `collections`: field has contract access
    |
 18 |         let collection = (&NFTPawnshop.collections[identifier] as auth &NonFungibleToken.Collection?)!
 ```
+
+### Code Coverage
+
+By interacting with the Emulator when:
+- Deploying smart contracts,
+- Executing scripts,
+- Sending transactions
+
+we are able to get the code coverage for our `NFTPawnshop` smart contract. Head over to http://localhost:8080/emulator/codeCoverage and search for the `A.045a1763c93006ca.NFTPawnshop` key in the resulting JSON response. It should look something like this:
+
+![NFTPawnshop Code Coverage](./nft-pawnshop-code-coverage.png)
+
+That is quite a lot of code that we managed to cover with our demo!
 
 ### Front-End
 
