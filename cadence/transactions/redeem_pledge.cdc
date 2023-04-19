@@ -19,7 +19,7 @@ transaction(identifier: String, pledgeID: UInt64) {
         let pledgeCollection = account.getCapability(NFTPawnshop.PrivatePath)
             .borrow<&NFTPawnshop.PledgeCollection{NFTPawnshop.PledgeCollectionPrivate}>()
             ?? panic("Could not borrow NFTPawnshop.PledgeCollectionPrivate reference!")
-        let pledge <- pledgeCollection.withdraw(id: pledgeID)
+        let pledge = pledgeCollection.borrowPledgePrivate(id: pledgeID)
 
         let vault = account.borrow<&FungibleToken.Vault>(
             from: /storage/flowTokenVault
@@ -37,6 +37,6 @@ transaction(identifier: String, pledgeID: UInt64) {
 
         account.unlink(tempPublicPath)
 
-        destroy pledge
+        destroy <- pledgeCollection.withdraw(id: pledgeID)
     }
 }

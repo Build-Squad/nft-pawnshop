@@ -44,7 +44,6 @@
     "NFTCatalog": {
       "source": "./cadence/contracts/NFTCatalog.cdc",
       "aliases": {
-        "emulator": "0x179b6b1cb6755e31",
         "testnet": "0x324c34e1c517e4db"
       }
     },
@@ -63,22 +62,24 @@
       "key": "144768ecc6c31408e14d3f6446d936308d8c4505eac03deba002b8652cf5a313"
     },
     "peter": {
-      "address": "0x01cf0e2f2f715450",
-      "key": "5a5b34b6cb75570d56658575c184b2efa345dc02df7c613a3f976c653d6c952a"
+      "address": "0xe03daebed8ca0615",
+      "key": "541efa6696ef47d502981099eceb968bcaab9c859bc7dd8fc3b55d68796fad21"
     },
     "emulator-admin": {
-      "address": "0x179b6b1cb6755e31",
-      "key": "deac85993cde3a424017e86294667c128e973b3a6cc7235a502b7636e723cae5"
+      "address": "0x045a1763c93006ca",
+      "key": "3449adfaa271e20fc1ce950097b2b243d422497e18930058308b527e99a447be"
     },
     "john-buyer": {
-      "address": "0xf3fcd2c1a78f5eee",
-      "key": "ab57b5929b40489435d672c79be8ea345e14674a19254637290a71110a98286b"
+      "address": "0x120e725050340cab",
+      "key": "39c957709468348e4a5545bd90b2f710ca7020346e6d46abcc0a1c50b944d17d"
     }
   },
   "deployments": {
     "emulator": {
+      "emulator-account": [
+        "NFTCatalog"
+      ],
       "emulator-admin": [
-        "NFTCatalog",
         "NFTPawnshop"
       ]
     }
