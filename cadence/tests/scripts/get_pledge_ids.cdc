@@ -1,6 +1,6 @@
 import NFTPawnshop from "NFTPawnshop"
 
-pub fun main(address: Address): [NFTPawnshop.PledgeInfo] {
+pub fun main(address: Address): [UInt64] {
     let account = getAccount(address)
 
     let pledgeCollection = account.getCapability(
@@ -11,12 +11,5 @@ pub fun main(address: Address): [NFTPawnshop.PledgeInfo] {
         return []
     }
 
-    let pledgeInfos: [NFTPawnshop.PledgeInfo] = []
-
-    for pledgeID in pledgeCollection!.getIDs() {
-        let pledge = pledgeCollection!.borrowPledge(id: pledgeID)
-        pledgeInfos.append(pledge.getInfo())
-    }
-
-    return pledgeInfos
+    return pledgeCollection!.getIDs()
 }

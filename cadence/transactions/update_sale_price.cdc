@@ -1,4 +1,4 @@
-import NFTPawnshop from "../contracts/NFTPawnshop.cdc"
+import NFTPawnshop from "NFTPawnshop"
 
 transaction(salePrice: UFix64) {
     prepare(account: AuthAccount) {

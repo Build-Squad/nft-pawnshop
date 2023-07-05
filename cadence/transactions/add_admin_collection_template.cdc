@@ -1,6 +1,6 @@
-import NFTPawnshop from "../contracts/NFTPawnshop.cdc"
-import NonFungibleToken from "../contracts/NonFungibleToken.cdc"
-import MetadataViews from "../contracts/MetadataViews.cdc"
+import NFTPawnshop from "NFTPawnshop"
+import NonFungibleToken from "NonFungibleToken"
+import MetadataViews from "MetadataViews"
 import {CONTRACT_NAME} from {CONTRACT_ADDRESS}
 
 transaction(collectionIdentifier: String, storagePath: StoragePath, privatePath: PrivatePath, publicPath: PublicPath) {

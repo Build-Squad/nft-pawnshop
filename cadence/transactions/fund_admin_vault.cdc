@@ -1,5 +1,5 @@
-import FungibleToken from "../contracts/FungibleToken.cdc"
-import NFTPawnshop from "../contracts/NFTPawnshop.cdc"
+import FungibleToken from "FungibleToken"
+import NFTPawnshop from "NFTPawnshop"
 
 transaction(amount: UFix64) {
     let admin: &NFTPawnshop.Admin
