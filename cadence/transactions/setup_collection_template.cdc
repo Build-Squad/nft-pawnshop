@@ -1,5 +1,5 @@
-import NonFungibleToken from "../contracts/NonFungibleToken.cdc"
-import MetadataViews from "../contracts/MetadataViews.cdc"
+import NonFungibleToken from "NonFungibleToken"
+import MetadataViews from "MetadataViews"
 import {CONTRACT_NAME} from {CONTRACT_ADDRESS}
 
 transaction {

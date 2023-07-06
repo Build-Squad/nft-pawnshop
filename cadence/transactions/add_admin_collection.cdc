@@ -1,7 +1,7 @@
-import NFTPawnshop from "../contracts/NFTPawnshop.cdc"
-import NonFungibleToken from "../contracts/NonFungibleToken.cdc"
-import MetadataViews from "../contracts/MetadataViews.cdc"
-import ExampleNFT from 0xf8d6e0586b0a20c7
+import NFTPawnshop from "NFTPawnshop"
+import NonFungibleToken from "NonFungibleToken"
+import MetadataViews from "MetadataViews"
+import ExampleNFT from "ExampleNFT"
 
 transaction(collectionIdentifier: String, storagePath: StoragePath, privatePath: PrivatePath, publicPath: PublicPath) {
     let admin: &NFTPawnshop.Admin

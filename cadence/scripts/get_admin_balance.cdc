@@ -1,4 +1,4 @@
-import NFTPawnshop from "../contracts/NFTPawnshop.cdc"
+import NFTPawnshop from "NFTPawnshop"
 
 pub fun main(): UFix64 {
     return NFTPawnshop.getAdminBalance()

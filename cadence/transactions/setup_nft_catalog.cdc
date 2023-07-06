@@ -1,7 +1,7 @@
-import NonFungibleToken from "../contracts/NonFungibleToken.cdc"
-import MetadataViews from "../contracts/MetadataViews.cdc"
-import NFTCatalog from "../contracts/NFTCatalog.cdc"
-import ExampleNFT from "../contracts/ExampleNFT.cdc"
+import NonFungibleToken from "NonFungibleToken"
+import MetadataViews from "MetadataViews"
+import NFTCatalog from "NFTCatalog"
+import ExampleNFT from "ExampleNFT"
 
 transaction {
     prepare(signer: AuthAccount) {

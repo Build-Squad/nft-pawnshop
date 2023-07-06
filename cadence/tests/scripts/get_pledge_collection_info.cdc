@@ -1,6 +1,6 @@
 import NFTPawnshop from "NFTPawnshop"
 
-pub fun main(address: Address): [NFTPawnshop.PledgeInfo] {
+pub fun main(address: Address): Bool {
     let account = getAccount(address)
 
     let pledgeCollection = account.getCapability(
@@ -8,7 +8,7 @@ pub fun main(address: Address): [NFTPawnshop.PledgeInfo] {
     ).borrow<&NFTPawnshop.PledgeCollection{NFTPawnshop.PledgeCollectionPublic}>()
 
     if pledgeCollection == nil {
-        return []
+        return false
     }
 
     let pledgeInfos: [NFTPawnshop.PledgeInfo] = []
@@ -18,5 +18,5 @@ pub fun main(address: Address): [NFTPawnshop.PledgeInfo] {
         pledgeInfos.append(pledge.getInfo())
     }
 
-    return pledgeInfos
+    return pledgeInfos.length == 2
 }

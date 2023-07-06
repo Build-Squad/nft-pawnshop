@@ -1,5 +1,5 @@
-import NFTPawnshop from "../contracts/NFTPawnshop.cdc"
-import NonFungibleToken from "../contracts/NonFungibleToken.cdc"
+import NFTPawnshop from "NFTPawnshop"
+import NonFungibleToken from "NonFungibleToken"
 
 transaction(identifier: String, recipient: Address) {
     prepare(account: AuthAccount) {

@@ -1,4 +1,4 @@
-import NFTStorefrontV2 from "../contracts/NFTStorefrontV2.cdc"
+import NFTStorefrontV2 from "NFTStorefrontV2"
 
 transaction {
     prepare(acct: AuthAccount) {

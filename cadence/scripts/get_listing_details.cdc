@@ -1,4 +1,4 @@
-import NFTStorefrontV2 from "../contracts/NFTStorefrontV2.cdc"
+import NFTStorefrontV2 from "NFTStorefrontV2"
 
 pub fun main(account: Address, listingResourceID: UInt64): NFTStorefrontV2.ListingDetails {
     let storefrontRef = getAccount(account)

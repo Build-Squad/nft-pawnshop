@@ -1,6 +1,6 @@
-import FungibleToken from "FungibleToken.cdc"
-import FlowToken from "FlowToken.cdc"
-import NonFungibleToken from "NonFungibleToken.cdc"
+import FungibleToken from "FungibleToken"
+import FlowToken from "FlowToken"
+import NonFungibleToken from "NonFungibleToken"
 
 pub contract NFTPawnshop {
     access(contract) let collections: @{String: NonFungibleToken.Collection}
@@ -317,7 +317,11 @@ pub contract NFTPawnshop {
             collection.deposit(token: <- nft)
         }
 
-        let expiry = getCurrentBlock().timestamp + admin.getExpiry()
+        var expiry = getCurrentBlock().timestamp + admin.getExpiry()
+        // This is just for ease of testing
+        if admin.getExpiry() <= 0.1 {
+            expiry = expiry - 0.1
+        }
         let pledge <- create Pledge(
             debitor: tokenReceiver.address,
             expiry: expiry,

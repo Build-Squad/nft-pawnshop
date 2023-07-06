@@ -1,8 +1,8 @@
-import FlowToken from "../contracts/FlowToken.cdc"
-import FungibleToken from "../contracts/FungibleToken.cdc"
-import NonFungibleToken from "../contracts/NonFungibleToken.cdc"
-import NFTCatalog from "../contracts/NFTCatalog.cdc"
-import NFTStorefrontV2 from "../contracts/NFTStorefrontV2.cdc"
+import FlowToken from "FlowToken"
+import FungibleToken from "FungibleToken"
+import NonFungibleToken from "NonFungibleToken"
+import NFTCatalog from "NFTCatalog"
+import NFTStorefrontV2 from "NFTStorefrontV2"
 
 /// Transaction facilitates the purcahse of listed NFT.
 /// It takes the storefront address, listing resource that need

@@ -1,9 +1,9 @@
-import FlowToken from "../contracts/FlowToken.cdc"
-import FungibleToken from "../contracts/FungibleToken.cdc"
-import NonFungibleToken from "../contracts/NonFungibleToken.cdc"
-import MetadataViews from "../contracts/MetadataViews.cdc"
-import NFTCatalog from "../contracts/NFTCatalog.cdc"
-import NFTStorefrontV2 from "../contracts/NFTStorefrontV2.cdc"
+import FlowToken from "FlowToken"
+import FungibleToken from "FungibleToken"
+import NonFungibleToken from "NonFungibleToken"
+import MetadataViews from "MetadataViews"
+import NFTCatalog from "NFTCatalog"
+import NFTStorefrontV2 from "NFTStorefrontV2"
 
 /// Transaction used to facilitate the creation of the listing under the signer's owned storefront resource.
 /// It accepts the certain details from the signer,i.e. -
@@ -29,12 +29,12 @@ transaction(collectionIdentifier: String, saleItemID: UInt64, saleItemPrice: UFi
 
     prepare(acct: AuthAccount) {
         self.catalog = NFTCatalog.getCatalog()
-        
+
         assert(
             self.catalog.containsKey(collectionIdentifier),
             message: "Provided collection is not in the NFT Catalog."
         )
-        
+
         let value = self.catalog[collectionIdentifier]!
 
         self.saleCuts = []

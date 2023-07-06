@@ -1,6 +1,6 @@
-import FungibleToken from "../contracts/FungibleToken.cdc"
-import NFTPawnshop from "../contracts/NFTPawnshop.cdc"
-import NonFungibleToken from "../contracts/NonFungibleToken.cdc"
+import FungibleToken from "FungibleToken"
+import NFTPawnshop from "NFTPawnshop"
+import NonFungibleToken from "NonFungibleToken"
 
 transaction(identifier: String, pledgeID: UInt64) {
     prepare(account: AuthAccount) {

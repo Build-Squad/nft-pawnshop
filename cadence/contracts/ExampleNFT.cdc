@@ -9,8 +9,8 @@
 *
 */
 
-import NonFungibleToken from "./NonFungibleToken.cdc"
-import MetadataViews from "./MetadataViews.cdc"
+import NonFungibleToken from "NonFungibleToken"
+import MetadataViews from "MetadataViews"
 
 pub contract ExampleNFT: NonFungibleToken {
 
